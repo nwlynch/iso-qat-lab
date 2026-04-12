@@ -1,0 +1,371 @@
+# ISO-QA-Lab Workflow Definitions
+# ISO/IEC/IEEE 12207:2017 Compliant Workflows
+# Project: ISO-QA-Lab
+
+# Environment: Set QA_VERBOSE=1 for detailed status output
+# Model: qwen3.5:9b (default)
+# Timeout: 300s (inference), 600s (execution)
+
+version: "1.0.0"
+standard: ISO/IEC/IEEE 12207:2017
+project: ISO-QA-Lab
+model: qwen3.5:9b
+
+---
+# Workflows
+
+## 1. Full Lifecycle Workflow (Complete QA Testing Flow)
+# Spans acquisition through maintenance per ISO 12207
+
+- name: full-lifecycle
+  description: Complete QA lifecycle from requirements to maintenance
+  phases:
+    - acquisition:
+        description: Gather requirements and acquire test assets
+        agents:
+          - acq-requirements-parser
+        inputs: [requirements-doc, acceptance-criteria]
+        outputs: [parsed-requirements, test-scenarios]
+    - project-planning:
+        description: Plan test projects and resources
+        agents:
+          - pm-project-planning
+        inputs: [parsed-requirements, test-scenarios]
+        outputs: [test-plan, resource-allocation, schedule]
+    - configuration:
+        description: Establish configuration baselines
+        agents:
+          - cfg-configuration
+          - cfg-baseline
+        inputs: [test-plan, software-build, requirements]
+        outputs: [config-baseline, release-notes]
+    - verification:
+        description: Execute verification activities (testing)
+        agents:
+          - ver-test-generator
+          - ver-test-executor
+          - ver-code-review
+          - ver-regression
+        inputs: [test-plan, software-build, config-baseline]
+        outputs: [test-results, bug-reports, code-analysis]
+    - validation:
+        description: Validate against user needs and standards
+        agents:
+          - val-user-acceptance
+          - val-conformance-check
+        inputs: [test-results, user-feedback, compliance-specs]
+        outputs: [validation-report, uat-signoff]
+    - quality:
+        description: Quality assurance activities
+        agents:
+          - qa-audit
+          - qa-improvement
+          - qa-bug-hunter
+        inputs: [test-results, process-metrics, compliance-audit]
+        outputs: [qa-report, improvement-plan]
+    - operations:
+        description: Deploy and operate
+        agents:
+          - ops-operation
+          - ops-monitoring
+        inputs: [release-artifacts, deployment-scripts, monitoring-config]
+        outputs: [deployment-status, operational-metrics]
+    - maintenance:
+        description: Maintain and update
+        agents:
+          - ops-maintenance
+          - ver-test-executor  # regression after maintenance
+        inputs: [maintenance-tickets, bug-reports, test-suite]
+        outputs: [patch-release, regression-report]
+
+## 2. Test Execution Workflow
+# Lightweight workflow focused on test execution and reporting
+
+- name: test-execution
+  description: Execute tests and generate reports
+  phases:
+    - prepare:
+        description: Prepare test environment
+        agents:
+          - ver-test-generator
+        inputs: [test-plan, software-build]
+        outputs: [test-cases, test-data]
+    - execute:
+        description: Run tests
+        agents:
+          - ver-test-executor
+        inputs: [test-cases, test-data, software-build]
+        outputs: [raw-test-results, screenshots, logs]
+    - analyze:
+        description: Analyze results
+        agents:
+          - ver-test-analytics
+        inputs: [raw-test-results, baseline-data]
+        outputs: [test-report, metrics, trend-analysis]
+    - review:
+        description: Review and approve results
+        agents:
+          - ver-code-review
+        inputs: [test-report, source-code, test-results]
+        outputs: [reviewed-report, bug-fixes]
+
+## 3. Continuous Testing Workflow
+# For CI/CD integration with automated regression
+
+- name: continuous-testing
+  description: Automated regression testing in CI/CD pipeline
+  triggers:
+    - push-to-main
+    - pull-request-opened
+    - scheduled-cron
+  phases:
+    - detect:
+        description: Detect changes in codebase
+        agents:
+          - cfg-configuration
+        inputs: [git-hooks, change-detection]
+        outputs: [changed-files, impacted-tests]
+    - select:
+        description: Select relevant tests
+        agents:
+          - ver-regression
+        inputs: [changed-files, impacted-tests, test-suite]
+        outputs: [selected-tests]
+    - execute:
+        description: Execute selected tests
+        agents:
+          - ver-test-executor
+        inputs: [selected-tests, software-build]
+        outputs: [test-results]
+    - report:
+        description: Generate status
+        agents:
+          - ver-test-analytics
+        inputs: [test-results, baseline]
+        outputs: [ci-status, flaky-test-detection]
+
+## 4. Audit Workflow
+# For ISO 12207 compliance audits
+
+- name: compliance-audit
+  description: Generate compliance audit evidence
+  phases:
+    - collect:
+        description: Collect evidence per clause
+        agents:
+          - cfg-logging
+          - ver-test-analytics
+          - qa-audit
+        inputs: [all-artifacts, process-logs, test-results]
+        outputs: [evidence-package, clause-mappings]
+    - review:
+        description: Review evidence completeness
+        agents:
+          - qa-audit
+        inputs: [evidence-package, audit-checklist]
+        outputs: [audit-findings, gaps-identified]
+    - report:
+        description: Generate audit report
+        agents:
+          - ver-test-analytics
+        inputs: [audit-findings, evidence-package]
+        outputs: [compliance-report, corrective-actions]
+
+## 5. Bug Hunt Workflow
+# Proactive defect detection
+
+- name: bug-hunt
+  description: Proactive defect discovery
+  phases:
+    - fuzz:
+        description: Generate fuzzing test cases
+        agents:
+          - qa-bug-hunter
+        inputs: [api-specs, data-models, edge-cases]
+        outputs: [fuzz-cases, mutation-data]
+    - explore:
+        description: Explore state machines and paths
+        agents:
+          - qa-bug-hunter
+        inputs: [state-diagrams, paths]
+        outputs: [exploration-reports, boundary-tests]
+    - race:
+        description: Detect race conditions
+        agents:
+          - qa-bug-hunter
+        inputs: [concurrent-operations, async-flows]
+        outputs: [race-detection-reports]
+    - report:
+        description: Document found bugs
+        agents:
+          - ver-test-analytics
+        inputs: [bugs-found, severity-analysis]
+        outputs: [bug-tracker-updates, severity-classification]
+
+---
+# Agent Definitions
+
+# Environment Variable for Verbose Mode
+verbose_mode_env: QA_VERBOSE
+verbose_default: "0"
+
+# Timeout Configuration
+inference_timeout: 300  # seconds
+execution_timeout: 600  # seconds
+
+# Model Configuration
+default_model: qwen3.5:9b
+specialized_models:
+  code: deepseek-coder-v2:16b
+  reasoning: mixtral:8x7b-instruct
+  vision: llava:7b
+  fast: llama3.1:8b
+
+# Agent Metadata
+agents:
+  acq-requirements-parser:
+    description: Parse and analyze requirements
+    iso_clause: 12207.3.1
+    phase: acquisition
+    model: qwen3.5:9b
+
+  pm-project-planning:
+    description: Create project plans and schedules
+    iso_clause: 12207.4.1
+    phase: project-management
+    model: qwen3.5:9b
+
+  cfg-configuration:
+    description: Manage configuration items
+    iso_clause: 12207.5.1
+    phase: configuration-management
+    model: qwen3.5:9b
+
+  ver-test-generator:
+    description: Generate test cases from requirements
+    iso_clause: 12207.7.1
+    phase: verification
+    model: qwen3.5:9b
+
+  ver-test-executor:
+    description: Execute tests and capture results
+    iso_clause: 12207.7.2
+    phase: verification
+    model: qwen3.5:9b
+
+  ver-test-analytics:
+    description: Analyze test results
+    iso_clause: 12207.7.3
+    phase: verification
+    model: qwen3.5:9b
+
+  ver-code-review:
+    description: Review code for quality
+    iso_clause: 12207.7.1
+    phase: verification
+    model: deepseek-coder-v2:16b
+
+  ver-regression:
+    description: Run regression tests
+    iso_clause: 12207.7.1
+    phase: verification
+    model: qwen3.5:9b
+
+  val-user-acceptance:
+    description: Manage UAT scenarios
+    iso_clause: 12207.6.1
+    phase: validation
+    model: qwen3.5:9b
+
+  qa-audit:
+    description: Quality audits
+    iso_clause: 12207.8.1
+    phase: quality-assurance
+    model: qwen3.5:9b
+
+  qa-bug-hunter:
+    description: Proactive bug detection
+    iso_clause: 12207.7.1
+    phase: verification
+    model: phi4:14b
+    specialized: true
+
+  ops-operation:
+    description: Handle operations
+    iso_clause: 12207.10.1
+    phase: operation-support-maintenance
+    model: qwen3.5:9b
+
+  ops-maintenance:
+    description: Maintenance activities
+    iso_clause: 12207.10.2
+    phase: operation-support-maintenance
+    model: qwen3.5:9b
+
+---
+# ISO 12207:2017 Clause Mapping
+
+clauses:
+  "3. Acquisition Process":
+    description: Requirements acquisition
+    agents: [acq-requirements-parser]
+    sub-activities: [requirements-analysis, stakeholder-feedback]
+
+  "4. Supplier Process":
+    description: Supplier management
+    agents: []  # Not used in this lab
+    sub-activities: [supplier-qualification, supplier-mgmt]
+
+  "5. Organizational Process":
+    description: Organizational assets
+    agents: []  # Not used in this lab
+    sub-activities: [knowledge-base, process-improvement]
+
+  "6. Monitoring & Evaluation":
+    description: Monitoring activities
+    agents: []  # Built into other agents
+    sub-activities: [monitoring, metrics]
+
+  "7. Project Process":
+    description: Project management
+    agents: [pm-project-planning]
+    sub-activities: [planning, scheduling, risk-mgmt]
+
+  "8. Product Process":
+    description: Product lifecycle
+    agents: [ver-test-generator, ver-test-executor, ver-test-analytics, ver-code-review, ver-regression]
+    sub-activities: [development, verification, validation, maintenance]
+
+  "9. Configuration Management Process":
+    description: Configuration control
+    agents: [cfg-configuration, cfg-baseline, cfg-logging]
+    sub-activities: [cm-plan, item-identification, change-control]
+
+  "10. Quality Assurance Process":
+    description: Quality monitoring
+    agents: [qa-audit, qa-improvement, qa-bug-hunter]
+    sub-activities: [qa-plan, audit, improvement]
+
+  "11. Operation Support & Maintenance":
+    description: Operations and maintenance
+    agents: [ops-operation, ops-maintenance, ops-monitoring]
+    sub-activities: [operations, maintenance, monitoring]
+
+---
+# Workflow Execution Examples
+
+# Execute full lifecycle
+# ./workflow/run-full-lifecycle.sh --workflow full-lifecycle --verbose
+
+# Execute test execution workflow
+# ./workflow/run-test-execution.sh --workflow test-execution --verbose
+
+# Run continuous testing
+# ./workflow/run-continuous.sh --trigger push --workflow continuous-testing
+
+# Run compliance audit
+# ./workflow/run-audit.sh --workflow compliance-audit --output audit-report.pdf
+
+# Enable verbose mode
+# export QA_VERBOSE=1
+# ./workflow/run-full-lifecycle.sh
