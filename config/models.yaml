@@ -1,0 +1,168 @@
+# QA Lab - Model Configuration
+# Model selection strategy for multi-agent QA system
+# Updated: 2026-04-11
+
+config:
+  # Available models (as of 2026-04-11)
+  available:
+    - id: qwen3.5:9b
+      size: 6.6 GB
+      purpose: General purpose, reasoning, default model
+      agents: [test-generator, test-executor, analytics, documentation]
+      
+    - id: deepseek-coder-v2:16b
+      size: 8.9 GB
+      purpose: Code generation, review, analysis
+      agents: [code-review, test-generator]
+      
+    - id: qwen2.5-coder:7b
+      size: 4.7 GB
+      purpose: Code-focused tasks, test generation
+      agents: [code-review, test-generator]
+      
+    - id: qwen2.5-coder:14b
+      size: 9.0 GB
+      purpose: Complex code tasks
+      agents: [code-review, bug-hunter]
+      
+    - id: phi4:14b
+      size: 9.1 GB
+      purpose: Complex reasoning, bug hunting
+      agents: [bug-hunter, code-review]
+      
+    - id: deepseek-r1:14b
+      size: 9.0 GB
+      purpose: Reasoning-focused tasks
+      agents: [bug-hunter, code-review]
+      
+    - id: gemma3:12b
+      size: 8.1 GB
+      purpose: High performance tasks
+      agents: [analytics, test-executor]
+      
+    - id: mixtral:8x7b-instruct-v0.1-q4_0
+      size: 26 GB
+      purpose: Complex multi-step reasoning
+      agents: [analytics, test-generator]
+      
+    - id: llama3.1:8b
+      size: 4.9 GB
+      purpose: Fast inference, general tasks
+      agents: [test-executor, regression]
+      
+    - id: gemma3:4b
+      size: 3.3 GB
+      purpose: Fast, lightweight tasks
+      agents: [test-executor, regression]
+      
+    - id: llama3.2-vision:11b
+      size: 7.8 GB
+      purpose: Vision tasks (screenshots, UI)
+      agents: [test-executor]
+      
+    - id: llava:7b
+      size: 4.7 GB
+      purpose: Vision-language tasks
+      agents: [test-executor]
+      
+    - id: mistral:latest
+      size: 4.4 GB
+      purpose: Efficient tasks
+      agents: [documentation]
+      
+    - id: dolphin-mistral:latest
+      size: 4.1 GB
+      purpose: Alternative to mistral
+      agents: [documentation]
+      
+    - id: llama3.1:latest
+      size: 4.9 GB
+      purpose: Latest Llama model
+      agents: [all]
+      
+    - id: qwen3:14b
+      size: 9.3 GB
+      purpose: High capability tasks
+      agents: [bug-hunter, analytics]
+      
+    - id: gpt-oss:20b
+      size: 13 GB
+      purpose: High capability tasks
+      agents: [all]
+      
+    # Embedding models
+    - id: qwen2.5:14b-instruct-q4_K_M
+      size: 9.0 GB
+      purpose: Embeddings for search/clustering
+      agents: []
+      
+    - id: qwen3-embeddings-0.6B:Q8_0
+      size: 639 MB
+      purpose: Lightweight embeddings
+      agents: []
+      
+    - id: mxbai-embed-large:latest
+      size: 669 MB
+      purpose: Large embeddings
+      agents: []
+
+  # Agent model mappings
+  agents:
+    test-generator:
+      primary: qwen3.5:9b
+      fallbacks:
+        - llama3.1:8b
+        - qwen2.5-coder:7b
+      temperature: 0.7
+      
+    test-executor:
+      primary: qwen3.5:9b
+      fallbacks:
+        - gemma3:4b
+        - llama3.1:8b
+      temperature: 0.3
+      
+    analytics:
+      primary: mixtral:8x7b-instruct-v0.1-q4_0
+      fallbacks:
+        - qwen3.5:9b
+        - llama3.1:8b
+      temperature: 0.4
+      
+    code-review:
+      primary: deepseek-coder-v2:16b
+      fallbacks:
+        - qwen2.5-coder:14b
+        - phi4:14b
+      temperature: 0.2
+      
+    bug-hunter:
+      primary: phi4:14b
+      fallbacks:
+        - deepseek-r1:14b
+        - qwen3:14b
+      temperature: 0.8
+      
+    regression:
+      primary: llama3.1:8b
+      fallbacks:
+        - gemma3:4b
+      temperature: 0.3
+      
+    documentation:
+      primary: mistral:latest
+      fallbacks:
+        - qwen3.5:9b
+        - llama3.1:8b
+      temperature: 0.5
+
+  # Model loading strategy
+  loading:
+    - Always load qwen3.5:9b (default)
+    - Load vision models on-demand (llava:7b)
+    - Keep smaller models warm for quick tasks
+    - Load specialized models when needed
+
+---
+
+See `README.md` for project overview and `AGENTS.md` for agent descriptions.

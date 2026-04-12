@@ -1,0 +1,69 @@
+# 🧬 Test Generator Agent Session Template
+# This file defines the session structure for the Test Generator Agent
+
+agent:
+  name: "Test Generator Agent"
+  description: "Generates comprehensive test cases from requirements"
+  icon: "🧬"
+  purpose: "Create functional, security, and performance test cases"
+
+model:
+  default: "qwen3.5:9b"
+  alternatives:
+    - "deepseek-coder-v2:16b"  # For complex code generation
+    - "phi4:14b"  # For security-focused tests
+
+input:
+  format: "markdown"
+  expected_fields:
+    - "user_story"
+    - "acceptance_criteria"
+    - "non_functional_requirements"
+    - "out_of_scope_items"
+
+output:
+  formats:
+    - "json"  # Structured test cases
+    - "yaml"  # Test data fixtures
+    - "markdown"  # Test documentation
+  
+  structure:
+    test_cases:
+      - id: "TC-001"
+        type: "functional"
+        steps: []
+        expected_result: ""
+      - id: "TC-002"
+        type: "negative"
+        steps: []
+        expected_result: ""
+
+workflow:
+  phase: "Phase 2: Test Case Generation"
+  depends_on:
+    - "requirements_parsed"
+  feeds:
+    - "test_execution"
+
+prompts:
+  system: |
+    You are the Test Generator Agent. Your purpose is to create comprehensive
+    test cases from requirements. Consider:
+    
+    - Functional tests (happy paths)
+    - Edge cases and negative tests
+    - Security vulnerabilities
+    - Performance scenarios
+    
+    Generate test cases with clear steps and expected results.
+
+  task: |
+    Generate test cases for the following requirements:
+    
+    Requirements:
+    {{user_story}}
+    
+    Acceptance Criteria:
+    {{acceptance_criteria}}
+    
+    Generate functional, edge case, and security tests.
