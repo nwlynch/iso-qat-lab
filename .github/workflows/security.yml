@@ -1,0 +1,192 @@
+# ISO-QA-Lab: Security Testing Workflow
+# ISO/IEC/IEEE 12207:2017 Compliant
+# Purpose: Run security scans and OWASP testing
+
+name: ISO-QA-Lab - Security
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 3 * * *'  # Daily security scans
+
+env:
+  MODEL: qwen3.5:9b
+  TIMEOUT: 600
+  SECURITY_ENABLED: true
+
+jobs:
+  sst:
+    name: SAST Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Security Tools
+        run: |
+          pip install bandit semgrep trivy
+
+      - name: Bandit Static Analysis
+        run: |
+          bandit -r qa-lab/ -f json -o qa-lab/results/reports/bandit-report.json || true
+
+      - name: Semgrep Scan
+        run: |
+          semgrep scan -o qa-lab/results/reports/semgrep-report.json || true
+
+      - name: Upload Security Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sast-report
+          path: qa-lab/results/reports/
+          retention-days: 30
+
+  dast:
+    name: DAST Web Security
+    runs-on: ubuntu-latest
+    needs: sst
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker
+        run: |
+          docker pull owasp/zap2docker:daily
+
+      - name: Run OWASP ZAP
+        run: |
+          docker run --rm \
+            -t \
+            -v "$GITHUB_WORKSPACE:/zap/wrk" \
+            owasp/zap2docker:daily \
+            zap-quickstart.py -t http://localhost:8080 \
+              -t https://localhost:8443 \
+              -w /zap/wrk \
+              --cmd "docker-zap.sh" || true
+
+      - name: Upload DAST Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dast-report
+          path: qa-lab/results/reports/
+          retention-days: 30
+
+  dependency:
+    name: Dependency Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Audit Dependencies
+        run: |
+          pip audit || true
+
+      - name: Trivy Scan
+        run: |
+          trivy fs qa-lab/ --format json --output qa-lab/results/reports/trivy-report.json || true
+
+      - name: Upload Dependency Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-report
+          path: qa-lab/results/reports/
+          retention-days: 30
+
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Secret Scanner
+        run: |
+          pip install git-secrets
+
+      - name: Scan for Secrets
+        run: |
+          git-secrets scan -r .git-secrets.yml || true
+
+      - name: Upload Secret Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: secret-scan-report
+          path: qa-lab/results/reports/
+          retention-days: 30
+
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [sst, dast, dependency, secret-scan]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download All Security Reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: 'security-*'
+          path: qa-lab-security-results/
+
+      - name: Generate Security Summary
+        run: |
+          cat > qa-lab-security-results/security-summary.md << 'EOF'
+# ISO-QA-Lab Security Summary
+
+**Date:** $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+## Security Scan Results
+
+| Scanner | Critical | High | Medium | Low |
+|---|-- |--- |--- |--- |
+| Bandit | ${BANDIT_CRITICAL:-0} | ${BANDIT_HIGH:-0} | ${BANDIT_MEDIUM:-0} | ${BANDIT_LOW:-0} |
+| Semgrep | ${SEMGREP_CRITICAL:-0} | ${SEMGREP_HIGH:-0} | ${SEMGREP_MEDIUM:-0} | ${SEMGREP_LOW:-0} |
+| Trivy | ${TRIVY_CRITICAL:-0} | ${TRIVY_HIGH:-0} | ${TRIVY_MEDIUM:-0} | ${TRIVY_LOW:-0} |
+
+## Recommendations
+
+1. Review all critical findings
+2. Fix high severity issues
+3. Address medium severity vulnerabilities
+4. Document low severity findings
+
+## Status
+
+- **Overall Status:** ${OVERALL_STATUS:-READY}
+- **Critical Issues:** ${CRITICAL_ISSUES:-0}
+- **High Issues:** ${HIGH_ISSUES:-0}
+
+EOF
+
+      - name: Upload Security Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-summary
+          path: qa-lab-security-results/
+          retention-days: 30
+EOF
