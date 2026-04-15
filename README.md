@@ -99,31 +99,34 @@ export QA_VERBOSE=1
 #### 1. Full Lifecycle Workflow
 Complete QA lifecycle from requirements to maintenance:
 ```bash
-./workflow full-lifecycle
+./workflow/run-full-lifecycle.sh
 ```
 
 #### 2. Test Execution Workflow
 Lightweight test execution and reporting:
 ```bash
-./workflow test-execution
+./workflow/run-test-execution.sh
 ```
 
 #### 3. Continuous Testing Workflow
 CI/CD integration with automated regression:
 ```bash
-./workflow continuous-testing
+# Create continuous workflow (example)
+./workflow/run-full-lifecycle.sh --continuous
 ```
 
 #### 4. Compliance Audit Workflow
 ISO 12207 compliance audit evidence generation:
 ```bash
-./workflow compliance-audit
+# Create audit workflow (example)
+./workflow/run-full-lifecycle.sh --audit
 ```
 
 #### 5. Bug Hunt Workflow
 Proactive defect discovery:
 ```bash
-./workflow bug-hunt
+# Create bug hunt workflow (example)
+./workflow/run-full-lifecycle.sh --bug-hunt
 ```
 
 ### 📊 Verbose Mode
@@ -162,10 +165,6 @@ iso-qa-lab/
 ├── README.md
 ├── AGENTS.md
 ├── workflow/                 # Workflow execution scripts
-├── config/
-│   ├── agent-prompts.yaml    # Agent prompts with verbose support
-│   ├── workflows.yaml        # Workflow definitions
-│   └── env.sh               # Environment variable utilities
 ├── agents/
 │   ├── acq-requirements-parser/
 │   ├── pm-project-planning/
@@ -191,29 +190,22 @@ iso-qa-lab/
 #### Run with verbose mode:
 ```bash
 export QA_VERBOSE=1
-./workflow full-lifecycle
+export QA_MODEL=qwen3.5:9b
+./workflow/run-full-lifecycle.sh
 ```
 
 #### Override model:
 ```bash
 export QA_MODEL=deepseek-coder-v2:16b
-./workflow full-lifecycle
+export QA_VERBOSE=1
+./workflow/run-full-lifecycle.sh
 ```
 
-#### Run specific workflow:
+#### Check env.sh utility:
 ```bash
-./workflow compliance-audit
-```
-
-#### Check environment status:
-```bash
-source config/env.sh
 ./config/env.sh status
-```
-
-#### List available models:
-```bash
 ./config/env.sh list-models
+./config/env.sh validate
 ```
 
 ### 📜 Compliance
