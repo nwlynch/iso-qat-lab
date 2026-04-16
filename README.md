@@ -31,7 +31,7 @@ source config/env.sh
 export QA_VERBOSE=1
 
 # Run full lifecycle workflow
-./workflow full-lifecycle
+./workflow/full-lifecycle
 ```
 
 ### 🔧 Environment Variables
@@ -135,7 +135,7 @@ Enable detailed status output by setting `QA_VERBOSE=1`:
 
 ```bash
 export QA_VERBOSE=1
-./workflow full-lifecycle
+./workflow/full-lifecycle
 ```
 
 Verbose output includes:
