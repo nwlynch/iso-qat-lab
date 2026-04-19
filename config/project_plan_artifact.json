@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "project_name": {
+      "type": "string",
+      "description": "The formal name of the project being tested."
+    },
+    "scope": {
+      "type": "string",
+      "description": "A high-level description of what the project entails, referencing the original requirements."
+    },
+    "milestones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "milestone_name": {
+            "type": "string"
+          },
+          "target_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Planned", "In Progress", "Blocked", "Completed"]
+          }
+        },
+        "required": ["milestone_name", "target_date", "status"]
+      }
+    }
+  },
+  "required": ["project_name", "scope", "milestones"]
+}
