@@ -1,0 +1,34 @@
+{
+  "schema_name": "RequirementArtifact",
+  "description": "Artifact generated during the Acquisition Phase (Phase 1) that structures raw requirements based on ISO 12207.3.1.",
+  "required_fields": [
+    "requirement_id",
+    "description",
+    "requirement_type",
+    "source_clause",
+    "priority",
+    "acceptance_criteria",
+    "constraints",
+    "assumptions"
+  ],
+  "fields": {
+    "requirement_id": {"type": "string", "description": "Unique ID (e.g., REQ-001)."},
+    "description": {"type": "string", "description": "The narrative description of the requirement."},
+    "requirement_type": {"type": "enum", "options": ["functional", "non_functional"], "description": "Classification per requirement type."},
+    "source_clause": {"type": "string", "description": "The specific clause or section in the source document that mandated this requirement."},
+    "priority": {"type": "enum", "options": ["critical", "high", "medium", "low"], "description": "Business priority level."},
+    "acceptance_criteria": {"type": "array", "items": {"type": "string"}, "description": "Specific, verifiable conditions that must be met for the requirement to pass testing."},
+    "constraints": {"type": "array", "items": {"type": "string"}, "description": "Limitations or rules that must be adhered to (e.g., 'Must run in browser')."},
+    "assumptions": {"type": "array", "items": {"type": "string"}, "description": "Things taken as true for the project scope."}
+  },
+  "example": {
+    "requirement_id": "REQ-001",
+    "description": "The system shall allow users to log in via SSO.",
+    "requirement_type": "functional",
+    "source_clause": "User Story: Auth",
+    "priority": "critical",
+    "acceptance_criteria": ["System must accept SAML assertions.", "User must receive success confirmation."],
+    "constraints": ["Must support Okta SSO."],
+    "assumptions": ["SSO endpoint is stable and available 24/7."]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schema_name": "TestCaseArtifact",
+  "description": "Artifact generated during the Verification Phase (Phase 4) detailing test execution plans and results.",
+  "required_fields": [
+    "test_case_id",
+    "test_description",
+    "prerequisites",
+    "steps",
+    "expected_result",
+    "test_data_scope",
+    "risk_level",
+    "test_status",
+    "execution_details"
+  ],
+  "fields": {
+    "test_case_id": {"type": "string", "description": "Unique ID for the test case (e.g., TC-AUTH-001)."},
+    "test_description": {"type": "string", "description": "A concise summary of what this test verifies."},
+    "prerequisites": {"type": "array", "items": {"type": "string"}, "description": "The state the system must be in before this test can run."},
+    "steps": {"type": "array", "items": {"type": "object", "properties": {
+        "step_number": {"type": "integer"},
+        "action": {"type": "string", "description": "The action to perform (e.g., 'Click button X', 'Input text Y')."},
+        "input_data": {"type": "string", "description": "The data to use for the action."}
+    }, "required": ["step_number", "action", "input_data"]}, "description": "Ordered list of actionable steps."},
+    "expected_result": {"type": "string", "description": "What the system MUST show/do upon successful completion of all steps."},
+    "test_data_scope": {"type": "string", "description": "Definition of data needed (e.g., 'All standard user profiles')."},
+    "risk_level": {"type": "enum", "options": ["high", "medium", "low"], "description": "Risk if this test fails."},
+    "test_status": {"type": "enum", "options": ["PASS", "FAIL", "BLOCKED"], "description": "The recorded outcome of the test run."},
+    "execution_details": {
+        "timestamp": {"type": "string", "format": "ISO 8601", "description": "When the test was run."},
+        "executed_by": {"type": "string", "description": "Agent/User who ran the test."},
+        "actual_result_summary": {"type": "string", "description": "A brief summary of what actually happened."}
+    }
+  }
+}
