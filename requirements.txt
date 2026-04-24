@@ -1,0 +1,9 @@
+# Python Dependencies
+# List of Python packages required for the agents (e.g., for NLP, JSON handling, etc.)
+# Note: Playwright is primarily installed via npm, but its Python utilities might need listing here.
+# We rely on the agents' internal libraries and the system's virtual environment management.
+# Add any missing Python dependencies here.
+# Example:
+# pandas
+# pydantic
+# openai
