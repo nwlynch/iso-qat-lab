@@ -1,1 +1,23 @@
-node_modules/playwright*
+# Ignore Virtual Environments and Compiled Files
+# Directories and files created during local development that should NOT be version controlled.
+
+venv/
+.venv/
+
+node_modules/
+node_modules/*
+
+# Byte-compiled Python files
+*.pyc
+__pycache__/
+
+# OS-specific files
+.DS_Store
+thumbs.db
+
+# Build/Output directories
+qa-lab-project/results/
+venv/
+__pycache__/
+*.pyc
+qa-lab-project/results/
