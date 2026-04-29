@@ -4,6 +4,9 @@
 venv/
 .venv/
 
+node_modules/
+node_modules/*
+
 # Byte-compiled Python files
 *.pyc
 __pycache__/
