@@ -1,51 +1,63 @@
 # Code Review Agent Module (code_review_agent.py)
-# This module reviews code changes and suggests improvements based on test failures.
-# Dependencies: Access to code snippets and failure reports.
+# This module reviews the failure report and generates actionable suggestions for developers.
+# CORE FUNCTION: Turns test failures into prioritized, fixable code tasks.
+# INPUT: Analysis Report (from Analytics Agent) and Failed Tests Dictionary.
+# OUTPUT: List of actionable string suggestions.
 
-from typing import Dict, Any
+import asyncio
+from typing import Dict, Any, List
 
 async def review_failure_report(report: dict, failed_tests: dict) -> list:
     """
-    Analyzes the failure report (passed to it by the Analytics Agent).
-    It simulates a PR review, identifying code defects, suggesting fixes, and improving test coverage.
+    Analyzes the results to suggest code improvements, fixes, and test coverage gaps.
     :param report: The full analysis report dictionary.
-    :param failed_tests: A filtered dictionary containing only the failed test IDs and their error messages.
-    :return: A list of suggested code improvements or bug reports.
+    :param failed_tests: Dictionary of tests that failed.
+    :return: A list of suggested code improvements.
     """
-    print("--- [Code Review Agent] Reviewing the test failure report... ---")
+    print("--- [Code Review Agent] Reviewing the test failure report for actionable insights ---")
     
     if not failed_tests:
-        print("No failures found. No code review suggestions needed at this time.")
-        return ["No actionable bugs found based on the current test suite."]
+        print("No failures detected. Code Review: No action needed.")
+        return ["No actionable bugs found in this cycle."]
 
-    print(f"Detected {len(failed_tests)} failed tests. Initiating code review cycle.")
-    
     suggestions = []
     
     # --- CORE LOGIC TO BE WRITTEN ---
-    # 1. Iterate through all failed tests.
-    # 2. For each test, examine the error message/stack trace.
-    # 3. Prompt the LLM with: "The test failed with this specific error. Based on the requirements, what is the most likely bug in the source code?"
-    # 4. Structure the output suggestions (e.g., "File: /path/to/module.py", "Line: 42", "Suggestion: Fix this parameterization.").
+    # 1. Deep Dive: For every failure, the LLM must infer the root cause and suggest a fix location/code snippet.
+    # 2. Cross-Reference: Check if multiple failures point to the same underlying bug (high-priority finding).
     
-    # MOCK SIMULATION: Based on failure L-002 (Invalid credentials)
-    suggestions.append("🚨 Code Defect Found: In `user_auth_service.py`, the password validation logic might be too strict (L-002 failed).")
-    suggestions.append("💡 Suggestion: Relax the password regex pattern to allow for special characters.")
-    
-    # MOCK SUGGESTION: Code improvement for coverage
-    suggestions.append("💡 Improvement: Consider adding a dedicated unit test to check the service layer's exception handling, as it was not covered by the E2E test.")
-    
+    for test_id, failure_details in failed_tests.items():
+        print(f"Reviewing failure {test_id}: {failure_details[:50]}...")
+        
+        # MOCK: Suggesting a fix based on known test IDs.
+        if test_id == "L-002":
+            suggestions.append(
+                f"[HIGH PRIORITY] Test Failure L-002: Invalid credentials test failed. Check password regex validation in the user model layer."
+            )
+        elif test_id == "GEN-001":
+            suggestions.append(
+                "[MEDIUM PRIORITY] Test Failure GEN-001: Suggest enhancing unit tests around schema validation to prevent future data mapping errors."
+            )
+        
     print(f"✅ Code Review: Generated {len(suggestions)} actionable suggestions.")
     return suggestions
 
 # Example Usage (Self-Test)
-if __name__ == "__main__":
+async def main_test_run():
+    print("--- Running Code Review Agent Self-Test ---")
     # Mocking a failure report structure
     mock_failure_report = {"summary": "Fail rate: 1/2 tests failed. Flaky tests: None."}
-    mock_failed_tests = {"L-002": "Execution failed: Element 'password' not found in the DOM."}
+    mock_failed_tests = {
+        "L-002": "Execution failed: Timeout: Expected element 'text=Welcome Dashboard' not found within 10000ms.",
+        "GEN-001": "Execution failed: AssertionError: Schema validation failed."
+    }
     
-    suggestions = review_failure_report(mock_failure_report, mock_failed_tests)
+    suggestions = await review_failure_report(mock_failure_report, mock_failed_tests)
     
     print("\n--- Generated Code Suggestions ---")
     for suggestion in suggestions:
         print(f"- {suggestion}")
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main_test_run())

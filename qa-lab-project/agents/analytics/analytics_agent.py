@@ -1,16 +1,19 @@
 # Analytics Agent Module (analytics_agent.py)
-# This module processes the raw execution results and generates actionable insights.
-# Dependencies: Python standard library (for dict manipulation), mathematical functions.
+# This module processes raw test execution results and generates actionable insights,
+# transforming raw PASS/FAIL flags into meaningful metrics and failure reports.
+# CORE FUNCTION: Business Intelligence calculation from raw data.
+# INPUT: Raw test result dictionary (e.g., {"L-001": "PASS", "L-002": "FAIL"}).
+# OUTPUT: A structured report dictionary.
 
 from typing import Dict, Any
 
-def analyze_test_results(execution_results: Dict[str, str]) -> dict:
+async def analyze_test_results(execution_results: Dict[str, str]) -> dict:
     """
-    Parses the raw execution results from the Test Executor Agent.
+    Parses the raw execution results dictionary to calculate Pass/Fail rates and identify trends.
     :param execution_results: Dictionary mapping test IDs to status (PASS/FAIL).
-    :return: A comprehensive analysis report dictionary.
+    :return: A comprehensive analysis report.
     """
-    print("--- [Analytics Agent] Starting analysis of test outcomes ---")
+    print("--- [Analytics Agent] Analyzing test outcomes and calculating metrics ---")
     
     if not execution_results:
         return {"status": "SKIPPED", "summary": "No test results provided for analysis."}
@@ -29,33 +32,38 @@ def analyze_test_results(execution_results: Dict[str, str]) -> dict:
         "summary": []
     }
 
-    # Identify Failures and potential flakiness
-    failed_tests = {k: v for k, v in execution_results.items() if v != "PASS"}
-    
-    if failed_tests:
-        report["summary"].append(f"🚨 CRITICAL: {len(failed_tests)} test(s) failed. Immediate developer attention required.")
-        report["failed_details"] = failed_tests
+    # Determine overall health status
+    if fail_count > 0:
+        report["summary"].append(f"🚨 CRITICAL: {fail_count} test(s) failed. Immediate investigation required.")
     elif pass_count > 0:
-        report["summary"].append("✅ All executed tests passed successfully. High confidence in current build.")
+        report["summary"].append("✅ Test cycle completed with no failures. High confidence.")
     else:
-        report["summary"].append("⚠️ WARNING: No test results were processed.")
+        report["summary"].append("⚠️ WARNING: No test results processed.")
         
-    # TODO: Future enhancement: Implement flakiness detection.
-    # Flakiness Detection Logic: Requires historical run data (requires database/storage integration).
-    # For MVP: We can flag tests that fail intermittently if we track historical run counts.
-    report["flakiness_alert"] = "Flakiness analysis requires historical data."
+    # Store details for downstream agents (Code Review, Bug Hunter)
+    report["failed_details"] = {k: v for k, v in execution_results.items() if v != "PASS"}
     
+    # TODO: Implement Flakiness Detection (requires historical data lookups)
+    report["flakiness_alert"] = "Flakiness analysis requires historical run data."
+    
+    print(f"✅ Analysis Complete: {pass_count}/{total_tests} passed.")
     return report
 
 # Example Usage (Self-Test)
-if __name__ == "__main__":
+async def main_test_run():
     print("--- Running Analytics Agent Self-Test ---")
     # Mocking results from the Test Executor
     mock_results = {
         "L-001": "PASS", 
-        "L-002": "FAIL"
+        "L-002": "FAIL", 
+        "L-003": "PASS"
     }
-    analysis = analyze_test_results(mock_results)
-    import json
+    analysis = await analyze_test_results(mock_results)
+    
     print("\n--- GENERATED REPORT ---")
-    print(json.dumps(analysis, indent=2))
+    print(f"Metrics: {analysis['metrics']}")
+    print(f"Summary: {analysis['summary']}")
+    
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main_test_run())

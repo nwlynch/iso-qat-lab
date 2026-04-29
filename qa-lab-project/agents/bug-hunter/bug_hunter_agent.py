@@ -1,29 +1,33 @@
 # Bug Hunter Agent Module (bug_hunter_agent.py)
-# This agent actively generates edge cases and fuzzing tests based on observed gaps.
-# Dependencies: Access to requirements, failed tests, and code context.
+# This agent actively searches for issues and edge cases by generating fuzzing and exploratory tests.
+# CORE FUNCTION: Proactively finds gaps in coverage based on failure analysis.
+# INPUT: Original requirements and a dictionary of failed tests.
+# OUTPUT: A list of new, highly specific, and unusual test cases.
 
-import random
-from typing import Dict, Any
+import asyncio
+from typing import List, Dict, Any
 
 async def generate_fuzzing_tests(requirements: str, failed_tests: dict) -> list:
     """
     Uses advanced prompting to identify edge cases, fuzzing inputs, and boundary condition failures.
     :param requirements: The original user story context.
-    :param failed_tests: The dictionary of tests that failed in the previous cycle.
+    :param failed_tests: Dictionary of tests that failed in the previous cycle.
     :return: A list of new, highly specific, and often unusual test cases.
     """
     print("--- [Bug Hunter] Actively searching for unknown failure vectors... ---")
     
     new_test_ideas = []
     
-    # --- CORE LOGIC TO BE WRITTEN ---
-    # 1. Combine the original requirements + the list of failed tests into one large prompt.
-    # 2. Prompt the LLM: "Given these failures, what obscure, unusual, or out-of-spec inputs could break the system?"
-    # 3. Filter the LLM output for actionable, unique test IDs and descriptions.
+    # --- LLM INTERACTION LOGIC HERE ---
+    # TODO: Construct a prompt that makes the LLM act as an adversarial QA engineer.
+    # The prompt must instruct the LLM to find inputs that break assumptions in the requirements.
     
-    # MOCK SIMULATION: Generating tests that target the failure points we know about.
+    # MOCK SIMULATION: Creating targeted new test ideas based on current failures.
+    print("Analysis: Combining requirements and failures to hunt for gaps.")
+    await asyncio.sleep(1) 
+    
     if "login" in requirements.lower() and failed_tests:
-        # We know L-002 failed on empty credentials. We can create a targeted fuzzing test.
+        # Generate test cases targeting common flaws seen in login sequences.
         new_test_ideas.append({
             "id": "FH-001", 
             "type": "E2E", 
@@ -31,7 +35,6 @@ async def generate_fuzzing_tests(requirements: str, failed_tests: dict) -> list:
             "framework": "Playwright", 
             "priority": "Critical"
         })
-        # Targeting the system that might fail (e.g., hitting the backend with invalid payloads)
         new_test_ideas.append({
             "id": "FH-002", 
             "type": "API", 
@@ -39,18 +42,25 @@ async def generate_fuzzing_tests(requirements: str, failed_tests: dict) -> list:
             "framework": "API_TEST", 
             "priority": "Critical"
         })
-
-    print(f"✅ Bug Hunter: Generated {len(new_test_ideas)} critical edge cases.")
-    return new_test_ideas
+        print(f"✅ Bug Hunter: Generated 2 critical, new, and targeted edge cases.")
+        return new_test_ideas
+    else:
+        print("ℹ️ Bug Hunter: No immediate failure patterns detected. No new fuzzing tests generated.")
+        return []
 
 # Example Usage (Self-Test)
-if __name__ == "__main__":
-    print("--- Running Bug Hunter Module Self-Test ---")
+async def main_test_run():
+    print("--- Running Bug Hunter Agent Self-Test ---")
+    # Mock inputs
     requirements = "User must be able to log in."
-    failed_tests = {"L-002": "Execution failed: Element 'password' not found in the DOM."}
+    failed_tests = {"L-002": "Execution failed: Timeout: Expected element 'Welcome Dashboard' not found within 10000ms."}
     
-    new_tests = generate_fuzzing_tests(requirements, failed_tests)
+    new_tests = await generate_fuzzing_tests(requirements, failed_tests)
     
     print("\n--- Generated Bug/Edge Case Tests ---")
     for test in new_tests:
         print(f"ID: {test['id']} | Type: {test['type']} | Desc: {test['description']}")
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main_test_run())

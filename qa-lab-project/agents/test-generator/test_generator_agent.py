@@ -1,45 +1,27 @@
 # Test Generator Agent Module (test_generator_agent.py)
-# This module contains the core logic for parsing requirements and generating tests.
-# Dependencies: LLM Model Access (Placeholder for real API calls)
+# This module encapsulates the logic for parsing complex requirements and generating structured test cases.
+# CORE FUNCTION: Translates natural language specs into executable test metadata.
+# INPUT: User requirements (string)
+# OUTPUT: Structured test case list (dict)
 
-# IMPORTANT: In a production environment, this function must interact with a
-# secure LLM Client (e.g., an OpenAI or Ollama client) that can be configured 
-# to use the model defined in model_selection_rules.md.
+import asyncio
+from typing import List, Dict, Any
+# Dependencies: LLM Model Access (via global context or API client)
 
 async def generate_test_cases(requirements: str, model_rules: str) -> dict:
     """
     Analyzes user requirements and generates structured, executable test cases using the LLM.
-    :param requirements: The user story or acceptance criteria.
-    :param model_rules: The full model selection rules string (used for context).
-    :return: A dictionary containing structured test case JSON/YAML.
+    :param requirements: The user story or acceptance criteria (string).
+    :param model_rules: The current set of model rules, used to select the optimal LLM.
+    :return: A dictionary containing structured test case metadata.
     """
-    print("\n--- [Test Generator] Starting test case generation process ---")
-    print(f"--- Using Model Context: {model_rules[:100]}... ---")
+    print("\n--- [Test Generator] Executing test case generation process ---")
     
-    # 1. Construct the comprehensive system prompt
-    system_prompt = f"""
-    You are a Senior QA Engineer and Test Case Expert. Your task is to convert vague, natural language requirements into precise, structured, and executable test cases.
+    # --- LLM INTERACTION LOGIC HERE ---
+    # TODO: Integrate with LLM API. The prompt must be detailed, instructing the LLM to output ONLY a machine-readable JSON object.
+    # The prompt must leverage the 'model_rules' context to select the right LLM.
     
-    Goal: Convert the following requirements into a list of test cases.
-    
-    Requirements: {requirements}
-    
-    Constraint Checklist:
-    - Every test must have a unique ID (e.g., L-001).
-    - Every test must specify its framework (e.g., Playwright, Selenium, Unit).
-    - All test cases MUST be outputted as a single, valid JSON list. Do not include any markdown formatting outside the JSON structure.
-    """
-    
-    # 2. Placeholder for LLM API Call (CRITICAL STEP)
-    print("Attempting to call the configured LLM (Primary: qwen3.5:9b)...")
-    
-    # --- LLM_API_CALL_PLACEHOLDER ---
-    # In a real setup: 
-    # client = LLMClient(model=get_model_from_rules(model_rules))
-    # llm_output = await client.generate(system_prompt, requirements)
-    # --------------------------------
-    
-    # MOCK SIMULATION: Replacing the LLM call with our previous successful mock logic.
+    # MOCK SIMULATION: Placeholder for LLM call.
     await asyncio.sleep(1) 
     
     if "login" in requirements.lower():
@@ -55,9 +37,3 @@ async def generate_test_cases(requirements: str, model_rules: str) -> dict:
         ]
         print("✅ Test Generator: Successfully generated mock test cases.")
         return {"status": "SUCCESS", "test_cases": mock_tests}
-
-# Example usage (for testing the module in isolation)
-# async def test_module_self_test():
-#     await generate_test_cases("The user must be able to log in with valid credentials", "model rules").
-# if __name__ == "__main__":
-#     asyncio.run(test_module_self_test())
