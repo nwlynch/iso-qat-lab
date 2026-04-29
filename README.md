@@ -1,5 +1,4 @@
-# /qa-lab/ Root Directory Structure
-This directory holds all scaffolding for the QA Lab.
+# 📘 QA Lab Project Blueprint: ISO/IEC/IEEE 12207:2017 Compliant Workflow
 ## Agents
 - /agents/: Contains the core logic modules for each agent.
 ## Tests
