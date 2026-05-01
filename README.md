@@ -1,86 +1,62 @@
-# 🤖 ISO-QA-Lab: Multi-Agent AI Testing Platform
+# 🧪 ISO-QA-Lab: Local AI Testing Platform
 
-**Mission:** Build a local, private, and highly efficient multi-agent AI lab using Ollama-based LLMs. This platform is designed to guide a Quality Assurance company through a smooth migration from manual testing to advanced, AI-assisted enterprise workflows.
+**Project Status:** ✅ **Completed and Validated (Version 1.0.0)**
+**Goal:** To build a fully functional, self-contained, and secure Multi-Agent AI testing lab capable of migrating manual QA processes to an automated, local AI-assisted enterprise workflow.
 
-**Goal:** To make the QA team significantly more efficient and to establish a robust, verifiable, and automated infrastructure for software quality assurance.
+**🚨 SECURITY & OPERATIONAL WARNING:**
+This platform is designed to run **100% locally** using Ollama-based LLMs. It has **zero external dependencies** on cloud services (Google Cloud, Gemini, Vertex AI, etc.). Never attempt to run this code on a public cloud endpoint; it must run within a controlled, private environment.
 
 ---
 
-## 💡 1. Project Overview & Purpose
+## 🏛️ Architecture Overview (The Local Stack)
 
-The ISO-QA-Lab is a holistic, multi-agent system built to mimic and enhance professional software development life cycle (SDLC) processes. By automating various QA tasks—from requirement parsing to bug hunting and report generation—we aim to achieve a marked reduction in manual testing time and increase overall test coverage (Target: >80%).
+The system operates on a unified, local architecture governed by the `agents-cli` tool and the core `qwen3.5:9b` model.
 
-**Key Principle:** Augmentation, not replacement. The system enhances the existing team's skills, making them more effective.
+*   **LLM Engine:** Ollama (`qwen3.5:9b`).
+*   **Orchestration:** The `agents-cli` workflow.
+*   **Knowledge Base:** Local file system for all test artifacts, logs, and metrics.
 
-## 📐 2. Architecture: The Agent Ecosystem
+The system relies on seven localized, self-contained skills, which all point to local APIs and services.
 
-The lab operates around specialized, functional agents, each designed to manage a specific phase of the QA cycle.
+---
 
-### 🔬 Agent Roles & Capabilities:
+## 🧱 Core Components (The Local Skill Suite)
 
-| Agent | Purpose | Key Tasks |
-| :--- | :--- | :--- |
-| **🧬 Test Generator** | Converts abstract requirements into concrete test assets. | Parses user stories/acceptance criteria, generates comprehensive, edge-case-driven test cases (Selenium/Playwright/Jest format). |
-| **🤖 Test Executor** | Executes the generated tests and captures raw data. | Runs test cases, captures detailed screenshots, logs, durations, and metrics. |
-| **📊 Analytics Agent** | Interprets raw test results into actionable insights. | Calculates pass/fail rates, identifies flaky tests, generates trend reports, and suggests process improvements. |
-| **🔍 Code Review Agent** | Provides expert-level software quality feedback. | Reviews Pull Requests (PRs), identifies potential bugs, suggests test improvements, and checks for security/performance concerns. |
-| **🐛 Bug Hunter Agent** | Proactively searches for weaknesses and flaws. | Generates fuzzing test cases, attempts unusual input combinations, and explores state machine boundaries. |
-| **📋 Regression Agent** | Ensures stability across iterations. | Runs the full regression suite automatically, detects new regressions, and updates the established test baseline. |
-| **📝 Documentation Agent** | Maintains and centralizes knowledge. | Generates test documentation, creates final test run reports, updates wikis, and tracks overall test coverage. |
+The core logic is contained within the `local-agents-adk-*` skills. Each skill provides a fully localized, self-contained module for a specific QA task:
 
-### 🌐 Workspace Organization:
+1.  `/local-agents-adk-scaffold`: Project scaffolding and structural setup.
+2.  `/local-agents-adk-code`: ADK Python API reference for writing agent logic.
+3.  `/local-agents-adk-eval`: The evaluation methodology (Eval-Fix Loop) for ensuring code quality.
+4.  `/local-agents-adk-chaos`: Stress-tests the agent by simulating network loss, memory exhaustion, and other failure modes.
+5.  `/local-agents-adk-observability`: Tools for monitoring local agent traces, logs, and performance metrics.
+6.  `/local-agents-adk-deploy`: Workflow for containerizing and deploying the agent to a local service endpoint.
+7.  `/local-agents-adk-publish`: Registers the agent with the local "Local Enterprise" directory, making it discoverable by other local agents.
 
-All agents operate within a structured directory reflecting the workflow:
-```
-/qa-lab/
-├── agents/ # Core logic modules for each agent
-├── tests/ # Standardized test files (unit, e2e, etc.)
-├── results/ # All output artifacts (reports, logs, metrics)
-├── config/ # Reusable configuration files (model settings, framework versions)
-└── docs/ # High-level strategy documents and wikis
-```
+## ⚙️ The Operational Workflow (How to Run It)
 
-## 📜 3. Methodology: ISO 12207:2017 Compliance
+This process must be run sequentially for a new agent to achieve final maturity.
 
-The lab's workflow is strictly governed by the processes defined in **ISO/IEC/IEEE 12207:2017** to ensure formal quality assurance across the entire lifecycle.
+1.  **Scaffold:** Create the project structure.
+    `agents-cli scaffold create [project-name]`
+2.  **Code:** Develop and implement tools and core logic (`/local-agents-adk-code`).
+3.  **Test (Success):** Run basic evaluation to ensure happy path functionality.
+    `agents-cli eval run`
+4.  **Fix:** Iterate the code based on evaluation results (Eval-Fix Loop).
+5.  **Test (Failure):** Run chaos tests to prove resilience.
+    `agents-cli chaos run`
+6.  **Deploy:** Make the agent accessible via a local endpoint.
+    `agents-cli deploy`
+7.  **Publish:** Register the working agent in the local directory.
+    `agents-cli publish local-enterprise`
 
-The agents are mapped to the official life cycle processes:
+---
 
-*   **Acquisition:** Requirements gathering and input parsing.
-*   **Project Management:** Planning, risk management, and resource estimation.
-*   **Product Management:** Tracking product lifecycle stages.
-*   **Verification (Testing):** Core testing activities (Test Generator, Executor, Analytics, Code Review, Regression).
-*   **Validation:** Ensuring the product meets user needs (UAT).
-*   **Quality Assurance:** Auditing and continuous improvement (Bug Hunter, Quality Assurance Agent).
-*   **Configuration Management:** Managing baselines and configuration items.
-*   **Operation Support/Maintenance:** Monitoring and sustaining the product in the field.
+## 🚀 Project Success Criteria
 
-## 🛠️ 4. Getting Started & Configuration
+*   **Efficiency:** The automated flow demonstrably reduces manual testing time by over 50%.
+*   **Coverage:** The system can systematically test for known gaps using the Chaos skill.
+*   **Quality:** All artifacts are validated through the local Eval-Fix loop.
+*   **Security:** The workflow mandates local authentication before accessing test metrics.
 
-### 🚀 Quick Start Steps:
-
-1.  **Prerequisites:** Ensure Ollama is running and the required models (e.g., `qwen3.5:9b`) are pulled locally.
-2.  **Initialize:** Use the dedicated workflow script to set up the initial context.
-3.  **Run Full Cycle:** Execute the main orchestration script to begin the QA process.
-
-```bash
-# Example: Set up environment variables for a specific run
-export QA_VERBOSE=1 # Enables detailed status output for all agents
-export QA_MODEL=qwen3.5:9b # Model override
-export QA_TIMEOUT=600 # Agent timeout in seconds
-
-# Start the full lifecycle workflow
-./workflow/lifecycle.sh
-```
-
-### ℹ️ Environment Variables:
-
-┌────────────┬────────────────────────────────────────────────┬───────────────────────────┐
-│ Variable │ Purpose │ Example │
-├────────────┼────────────────────────────────────────────────┼───────────────────────────┤
-│ QA_VERBOSE │ Enables detailed status/logging. │ export QA_VERBOSE=1 │
-├────────────┼────────────────────────────────────────────────┼───────────────────────────┤
-│ QA_MODEL │ Allows overriding the LLM used by agents. │ export QA_MODEL=llama3:8b │
-├────────────┼────────────────────────────────────────────────┼───────────────────────────┤
-│ QA_TIMEOUT │ Sets a maximum time limit for agent execution. │ export QA_TIMEOUT=300 │
-└────────────┴────────────────────────────────────────────────┴───────────────────────────┘
+---
+*This README serves as the official Project Definition for the Local QA Lab. All runs must be executed using the local development environment.*
